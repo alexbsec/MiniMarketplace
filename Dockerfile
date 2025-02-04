@@ -3,6 +3,7 @@ FROM ubuntu:22.04
 # Install Go, PostgreSQL client and dependencies
 RUN apt-get update && apt-get install -y wget curl make git gcc postgresql-client && \
     wget https://go.dev/dl/go1.22.7.linux-amd64.tar.gz && \
+    curl -sSf https://atlasgo.sh | sh && \
     tar -C /usr/local -xzf go1.22.7.linux-amd64.tar.gz && \
     rm go1.22.7.linux-amd64.tar.gz
 
