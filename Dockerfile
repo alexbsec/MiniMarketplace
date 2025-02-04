@@ -1,10 +1,10 @@
 FROM ubuntu:22.04
 
 # Install Go, PostgreSQL client and dependencies
-RUN apt-get update && apt-get install -y wget curl git gcc postgresql-client && \
-    wget https://go.dev/dl/go1.19.6.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.19.6.linux-amd64.tar.gz && \
-    rm go1.19.6.linux-amd64.tar.gz
+RUN apt-get update && apt-get install -y wget curl make git gcc postgresql-client && \
+    wget https://go.dev/dl/go1.22.7.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.22.7.linux-amd64.tar.gz && \
+    rm go1.22.7.linux-amd64.tar.gz
 
 # Add Go to PATH var
 ENV PATH="/usr/local/go/bin:$PATH"
@@ -22,10 +22,10 @@ RUN go mod download
 COPY . .
 
 # Build
-RUN go build -o bin/main ./src
+RUN make build 
 
 # Expose the application port
 EXPOSE 7676
 
 # Run
-CMD ["/app/main"]
+CMD ["/app/bin/main"]
