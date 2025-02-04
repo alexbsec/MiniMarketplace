@@ -90,7 +90,7 @@ func (h *Handler) Handle(ctx context.Context, record slog.Record) error {
 
 func NewHandler(opts *slog.HandlerOptions) *Handler {
 	if opts == nil {
-		opts = &slog.HandlerOptions{}
+        opts = &slog.HandlerOptions{Level: slog.LevelDebug}
 	}
 	b := &bytes.Buffer{}
 	return &Handler{
