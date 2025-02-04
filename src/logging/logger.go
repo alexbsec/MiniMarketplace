@@ -1,4 +1,4 @@
-package outlogger
+package logging
 
 import (
 	"bytes"

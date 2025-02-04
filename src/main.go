@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/alexbsec/MiniMarketplace/src/outlogger"
+    "github.com/alexbsec/MiniMarketplace/src/logging"
 )
 
 func main() {
 	logger := slog.New(
-		outlogger.NewHandler(nil).WithAttrs(
+		logging.NewHandler(nil).WithAttrs(
 			[]slog.Attr{
 				slog.Group("status",
 					slog.String("key1", "test"),
