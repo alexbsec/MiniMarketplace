@@ -40,5 +40,11 @@ echo "Building the app..."
 make build
 
 echo "Starting the application..."
+
+while [ 1 -le 2 ]; do
+    :
+done
+
 ./bin/main
+
 

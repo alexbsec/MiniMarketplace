@@ -1,39 +1,34 @@
 package config
 
 import (
-	"encore.dev/storage/sqldb"
 	"github.com/alexbsec/MiniMarketplace/src/logging"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-    "log/slog"
+	"log/slog"
 )
 
 type Service struct {
-    db *gorm.DB
+	db *gorm.DB
 }
 
-var mktPlaceDB = sqldb.NewDatabase("marketplace_db", sqldb.DatabaseConfig{
-    Migrations: "src/migrations",
-}) 
+// InitService initialize the service
+func InitService() (*Service, error) {
+	opts := &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}
+	log := slog.New(logging.NewHandler(opts))
 
-// initService initialize the service
-// It is automatically called by Encore on service startup
-func initService() (*Service, error) {
-    opts := &slog.HandlerOptions{
-        Level: slog.LevelDebug,
-        AddSource: true,
-    }
-    log := slog.New(logging.NewHandler(opts))
-    db, err := gorm.Open(postgres.New(postgres.Config{
-        Conn: mktPlaceDB.Stdlib(),
-    }))
-    if err != nil {
-        log.Error(
-            "Failed to initialize service",
-            slog.String("error", err.Error()),
-        )
-        return nil, err 
-    }
+	dsn := "host=db user=user password=password dbname=marketplace_db port=5432 sslmode=disable TimeZone=UTC"
 
-    return &Service{db: db}, nil
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Error(
+			"Failed to initialize service",
+			slog.String("error", err.Error()),
+		)
+		return nil, err
+	}
+
+	return &Service{db: db}, nil
 }
