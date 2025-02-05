@@ -9,7 +9,7 @@ data "external_schema" "gorm" {
 env "gorm" {
     src = data.external_schema.gorm.url
     migration {
-        dir = "file://src/migrations"
+        dir = "file://src/db/migrations"
     }
     dev = "postgres://user:password@db_dev:5432/marketplace_db_dev?sslmode=disable"
     url = "postgres://user:password@db:5432/marketplace_db?sslmode=disable"
