@@ -11,7 +11,7 @@ env "gorm" {
     migration {
         dir = "file://src/migrations"
     }
-    dev = "postgres://user:password@db:5432/marketplace_db?sslmode=disable"
+    dev = "postgres://user:password@db_dev:5432/marketplace_db_dev?sslmode=disable"
     url = "postgres://user:password@db:5432/marketplace_db?sslmode=disable"
 
 }

@@ -1,3 +1,3 @@
 build:
 	mkdir -p bin
-	go build -o bin/main ./src
+	go build -buildvcs=false -o bin/main ./src

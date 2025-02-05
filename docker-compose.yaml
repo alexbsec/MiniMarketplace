@@ -9,22 +9,49 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  db_dev:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: marketplace_db_dev
+    ports:
+      - "5433:5432"  
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - app_network
 
   app:
     build: .
     depends_on:
       - db
+      - db_dev
     environment:
-      DB_HOST: db
+      DB_HOST: db  # For prod
       DB_USER: user
       DB_PASSWORD: password
       DB_NAME: marketplace_db
       DB_PORT: 5432
+      DB_DEV_HOST: db_dev  # For dev DB
+      DB_DEV_NAME: marketplace_db_dev
+      DB_DEV_PORT: 5432
     volumes:
       - .:/app
     command: sh -c "./build.sh"
     ports:
       - "7676:7676"
+    networks:
+      - app_network
 
 volumes:
   postgres_data:
+  postgres_data_dev:
+
+networks:
+  app_network:
+    driver: bridge
+

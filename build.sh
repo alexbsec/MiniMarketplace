@@ -36,6 +36,9 @@ else
     echo "No schema changes detected. Skipping migration application."
 fi
 
+echo "Building the app..."
+make build
+
 echo "Starting the application..."
 ./bin/main
 
