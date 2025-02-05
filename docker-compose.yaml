@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:latest
     environment:
+      POSTGRES_HOST: db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: marketplace_db
@@ -15,6 +16,7 @@ services:
   db_dev:
     image: postgres:latest
     environment:
+      POSTGRES_HOST: db_dev
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: marketplace_db_dev

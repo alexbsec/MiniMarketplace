@@ -8,7 +8,7 @@ import (
 	_ "ariga.io/atlas-go-sdk/recordriver"
 	"ariga.io/atlas-provider-gorm/gormschema"
 	"github.com/alexbsec/MiniMarketplace/src/logging"
-    "github.com/alexbsec/MiniMarketplace/src/models"
+    "github.com/alexbsec/MiniMarketplace/src/db/models"
 )
 
 func main() {
