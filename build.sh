@@ -4,7 +4,7 @@
 set -e
 
 # Define the migration directory
-MIGRATION_DIR="src/migrations"
+MIGRATION_DIR="src/db/migrations"
 
 # Define the environment
 ENV="gorm"
