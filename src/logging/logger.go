@@ -137,3 +137,13 @@ func suppressDefaults(next func([]string, slog.Attr) slog.Attr) func([]string, s
 		return next(groups, a)
 	}
 }
+
+// Exports
+var (
+    Opts *slog.HandlerOptions = &slog.HandlerOptions{
+        Level:     slog.LevelDebug,
+	    AddSource: true,
+    }
+
+    Log *slog.Logger = slog.New(NewHandler(Opts))
+)
