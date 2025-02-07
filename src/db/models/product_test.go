@@ -27,14 +27,12 @@ func TestProductService_Create(t *testing.T) {
 
     mockService := config.InitMockService(gormDB)
 
-    product := &Product{
-        Name:        "Laptop",
-        Description: "A powerful laptop",
-        Price:       1200.50,
-        Points:      100,
-        Category:    "Electronics",
-    }
-
+    product := &Product{}
+    *product.Name = "Laptop"
+    *product.Price = 1200.00
+    *product.Points = 120
+    *product.Description = "A nice laptop"
+    *product.Category = "Electronics"
     // Expect BEGIN transaction
     mock.ExpectBegin()
 
@@ -93,8 +91,8 @@ func TestProductService_Fetch(t *testing.T) {
         t.Errorf("Expected no error, got: %v", err)
     }
 
-    if product.Name != "Laptop" {
-        t.Errorf("Expected product name 'Laptop', got: %s", product.Name)
+    if *product.Name != "Laptop" {
+        t.Errorf("Expected product name 'Laptop', got: %s", *product.Name)
     }
 
     if err := mock.ExpectationsWereMet(); err != nil {
@@ -122,13 +120,12 @@ func TestProductService_Update(t *testing.T) {
     mockService := config.InitMockService(gormDB)
 
     productID := uint(1)
-    updatedProduct := &Product{
-        Name:        "Updated Laptop",
-        Description: "An updated powerful laptop",
-        Price:       1300.00,
-        Points:      120,
-        Category:    "Electronics",
-    }
+    updatedProduct := &Product{}
+    *updatedProduct.Name = "Updated laptop"
+    *updatedProduct.Description = "new updated laptop"
+    *updatedProduct.Price = 1200
+    *updatedProduct.Points = 300
+    *updatedProduct.Category = "Electronics"
 
     // Expect BEGIN transaction
     mock.ExpectBegin()
