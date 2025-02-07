@@ -15,7 +15,11 @@ func main() {
     loader := gormschema.New("postgres") 
     log := slog.New(logging.NewHandler(nil))
 
-    stmts, err := loader.Load(&models.Product{})
+    stmts, err := loader.Load(
+        &models.Product{},
+        &models.User{},
+        )
+
     if err != nil {
         log.Error("Failed to load GORM schema", slog.String("error", err.Error()))
         return

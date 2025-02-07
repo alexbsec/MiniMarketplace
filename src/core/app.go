@@ -16,6 +16,9 @@ type App struct {
 func (app *App) initializeRoutes() {
     app.Router.HandleFunc("/products", controllers.HandleProducts)
     app.Router.HandleFunc("/products/", controllers.HandleProducts)
+
+    app.Router.HandleFunc("/users", controllers.HandleUsers)
+    app.Router.HandleFunc("/users/", controllers.HandleUsers)
 }
 
 // Initialize the app with the router and services

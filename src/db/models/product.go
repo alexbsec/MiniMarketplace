@@ -5,16 +5,9 @@ import (
 	"log/slog"
 
 	"github.com/alexbsec/MiniMarketplace/src/db/config"
+	"github.com/alexbsec/MiniMarketplace/src/db/models/utils"
 	"github.com/alexbsec/MiniMarketplace/src/logging"
 	"gorm.io/gorm"
-)
-
-type TransactionEvent string
-
-const (
-	CREATE TransactionEvent = "CREATE"
-	UPDATE TransactionEvent = "UPDATE"
-	DELETE TransactionEvent = "DELETE"
 )
 
 type Product struct {
@@ -24,6 +17,7 @@ type Product struct {
 	Price       *float64 `json:"price"`
 	Points      *uint    `json:"points"`
 	Category    *string  `json:"category"`
+	Stock       *uint    `json:"stock"`
 }
 
 type ProductService struct {
@@ -31,7 +25,11 @@ type ProductService struct {
 }
 
 func (ps *ProductService) Create(product *Product) error {
-	return ps.productTransaction(CREATE, func(tx *gorm.DB) error {
+    if !ps.isServiceRunning() {
+        return fmt.Errorf("Cannot proceed because service is offline") 
+    }
+
+	return models_utils.DoTransaction(ps.Service, models_utils.CREATE, func(tx *gorm.DB) error {
 		if err := tx.Create(product).Error; err != nil {
 			return fmt.Errorf("failed to create product: %w", err)
 		}
@@ -41,6 +39,10 @@ func (ps *ProductService) Create(product *Product) error {
 }
 
 func (ps *ProductService) Fetch(id uint) (*Product, error) {
+    if !ps.isServiceRunning() {
+        return nil, fmt.Errorf("Cannot proceed because service is offline") 
+    }
+
 	dbGorm, err := ps.Service.Db()
 	if err != nil {
 		return nil, err
@@ -63,7 +65,11 @@ func (ps *ProductService) Fetch(id uint) (*Product, error) {
 }
 
 func (ps *ProductService) Update(id uint, newProduct *Product) error {
-	return ps.productTransaction(UPDATE, func(tx *gorm.DB) error {
+    if !ps.isServiceRunning() {
+        return fmt.Errorf("Cannot proceed because service is offline") 
+    }
+
+	return models_utils.DoTransaction(ps.Service, models_utils.UPDATE, func(tx *gorm.DB) error {
 		var product Product
 		if err := tx.First(&product, id).Error; err != nil {
 			return fmt.Errorf("product with id %d not found: %w", id, err)
@@ -78,7 +84,10 @@ func (ps *ProductService) Update(id uint, newProduct *Product) error {
 }
 
 func (ps *ProductService) Delete(id uint) error {
-	return ps.productTransaction(DELETE, func(tx *gorm.DB) error {
+    if !ps.isServiceRunning() {
+        return fmt.Errorf("Cannot proceed because service is offline") 
+    }
+	return models_utils.DoTransaction(ps.Service, models_utils.DELETE, func(tx *gorm.DB) error {
 		if err := tx.Delete(&Product{}, id).Error; err != nil {
 			return fmt.Errorf("failed to delete product: %w", err)
 		}
@@ -87,27 +96,11 @@ func (ps *ProductService) Delete(id uint) error {
 	})
 }
 
-func (ps *ProductService) productTransaction(
-	event TransactionEvent,
-	txFunc func(*gorm.DB) error) error {
-	dbGorm, err := ps.Service.Db()
-	if err != nil {
-		logging.Log.Error(
-			"Erro ao obter conexão com banco de dados",
-			slog.String("error", err.Error()),
-		)
-		return err
-	}
 
-	// Execute transaction dynamically
-	return dbGorm.Transaction(func(tx *gorm.DB) error {
-		logging.Log.Info("Iniciando transação", slog.String("event", string(event)))
-		if err := txFunc(tx); err != nil {
-			logging.Log.Error("Erro durante a transação", slog.String("error", err.Error()))
-			return err
-		}
+func (ps *ProductService) isServiceRunning() bool {
+    if ps.Service == nil {
+        logging.Log.Error("Product Service is not initialized! Aborting")
+    }
 
-		logging.Log.Info("Transação concluída com sucesso", slog.String("event", string(event)))
-		return nil
-	})
+    return ps.Service != nil
 }
