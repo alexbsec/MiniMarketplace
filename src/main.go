@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"github.com/alexbsec/MiniMarketplace/src/core"
 )
 
 func main() {
-
-	fmt.Println("Servidor iniciado!")
+    app := app.App{}
+    app.Run(":7676")
 }

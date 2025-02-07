@@ -47,7 +47,7 @@ func TestProductService_Create(t *testing.T) {
     mock.ExpectCommit()
 
     productService := &ProductService{
-        service: mockService,
+        Service: mockService,
     }
 
     if err := productService.Create(product); err != nil {
@@ -85,7 +85,7 @@ func TestProductService_Fetch(t *testing.T) {
             AddRow(productID, "Laptop", "A powerful laptop", 1200.50, 100, "Electronics"))
 
     productService := &ProductService{
-        service: mockService,
+        Service: mockService,
     }
 
     product, err := productService.Fetch(productID)
@@ -155,7 +155,7 @@ func TestProductService_Update(t *testing.T) {
     mock.ExpectCommit()
 
     productService := &ProductService{
-        service: mockService,
+        Service: mockService,
     }
 
     if err := productService.Update(productID, updatedProduct); err != nil {
@@ -200,7 +200,7 @@ func TestProductService_Delete(t *testing.T) {
     mock.ExpectCommit()
 
     productService := &ProductService{
-        service: mockService,
+        Service: mockService,
     }
 
     if err := productService.Delete(productID); err != nil {

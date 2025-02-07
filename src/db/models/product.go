@@ -27,7 +27,7 @@ type Product struct {
 }
 
 type ProductService struct {
-	service *config.Service
+	Service *config.Service
 }
 
 func (ps *ProductService) Create(product *Product) error {
@@ -41,7 +41,7 @@ func (ps *ProductService) Create(product *Product) error {
 }
 
 func (ps *ProductService) Fetch(id uint) (*Product, error) {
-	dbGorm, err := ps.service.Db()
+	dbGorm, err := ps.Service.Db()
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (ps *ProductService) Delete(id uint) error {
 func (ps *ProductService) productTransaction(
     event TransactionEvent,
     txFunc func(*gorm.DB) error) error {
-    dbGorm, err := ps.service.Db()
+    dbGorm, err := ps.Service.Db()
     if err != nil {
         logging.Log.Error(
             "Erro ao obter conexão com banco de dados",
