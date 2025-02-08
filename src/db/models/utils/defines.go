@@ -7,3 +7,8 @@ const (
 	UPDATE TransactionEvent = "UPDATE"
 	DELETE TransactionEvent = "DELETE"
 )
+
+type MinifiedUser struct {
+    Email    *string
+    Password *string    
+}
