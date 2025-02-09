@@ -14,7 +14,8 @@ type Wallet struct {
 	ID     uint     `gorm:"primaryKey"`
 	Amount *float64 `gorm:"not null" json:"amount"`
 	Points *float64 `gorm:"not null" json:"points"`
-	User   User     `gorm:"foreignKey:UserRefer" json:"user"`
+    UserID uint     `gorm:"not null" json:"user_id"`
+	User   User     `gorm:"foreignKey:UserID"`
 }
 
 type WalletService struct {
