@@ -199,6 +199,7 @@ func parseJWT(r *http.Request) (*JWTContent, error) {
 }
 
 func createJWT(user *models.User) (string, error) {
+    // Create a one-day token
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
 		jwt.MapClaims{
