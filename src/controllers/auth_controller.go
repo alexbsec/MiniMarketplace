@@ -13,6 +13,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type Role uint
+
+const (
+    ROLE_ADMIN Role = 1
+    ROLE_USER  Role = 0
+)
+
 // TODO: make this secure
 var secretKey = []byte("test-secret")
 
@@ -34,6 +41,55 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Method not allowd", http.StatusMethodNotAllowed)
 	}
+}
+
+func UserAuthFlowLax(w http.ResponseWriter, r *http.Request, expectRole Role) bool {
+    jwtCtt, err := parseJWT(r) 
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return false
+    }
+
+    reqUser, err := userService.Fetch(jwtCtt.ID) 
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return false
+    }
+  
+    _, err = validateUserRequest(r, reqUser, expectRole) 
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return false
+    }
+
+    return true
+}
+
+func UserAuthFlow(w http.ResponseWriter, r *http.Request, id uint, expectRole Role) bool {
+    jwtCtt, err := parseJWT(r) 
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return false
+    }
+
+    if jwtCtt.ID != id {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized) 
+        return false
+    } 
+
+    reqUser, err := userService.Fetch(jwtCtt.ID) 
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return false
+    }
+  
+    _, err = validateUserRequest(r, reqUser, expectRole) 
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return false
+    }
+
+    return true
 }
 
 func handleLoginUser(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +131,11 @@ func handleLoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func ValidateUserRequest(r *http.Request, user *models.User) (*JWTContent, error) {
+func validateUserRequest(r *http.Request, user *models.User, expectRole Role) (*JWTContent, error) {
+    if *user.Role < uint(expectRole) {
+        return nil, fmt.Errorf("Unauthorized") 
+    }
+
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		return nil, fmt.Errorf("Unauthorized")
@@ -91,7 +151,7 @@ func ValidateUserRequest(r *http.Request, user *models.User) (*JWTContent, error
 	return token, nil
 }
 
-func ParseJWT(r *http.Request) (*JWTContent, error) {
+func parseJWT(r *http.Request) (*JWTContent, error) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		return nil, fmt.Errorf("Unauthorized")

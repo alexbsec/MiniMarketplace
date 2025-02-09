@@ -32,15 +32,17 @@ func TestUserService_Create(t *testing.T) {
 		Name:     new(string),
 		Email:    new(string),
 		Password: new(string),
+        Role:     new(uint),
 	}
 	*user.Name = "John Doe"
 	*user.Email = "john@doe.com"
 	*user.Password = "MyPasswd"
+    *user.Role = 1
 
 	mock.ExpectBegin()
 
 	mock.ExpectQuery(`INSERT INTO "users" .* RETURNING "id"`).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	mock.ExpectCommit()
@@ -79,8 +81,8 @@ func TestUserService_Fetch(t *testing.T) {
 	userID := uint(1)
 	mock.ExpectQuery(`SELECT \* FROM "users" WHERE "users"\."id" = \$1 ORDER BY "users"\."id" LIMIT \$2`).
 		WithArgs(userID, sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password"}).
-			AddRow(userID, "John Doe", "john@doe.com", "MyPasswd"))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "role"}).
+			AddRow(userID, "John Doe", "john@doe.com", "MyPasswd", 1))
 
 	userService := &models.UserService{
 		Service: mockService,
@@ -123,24 +125,27 @@ func TestUserService_Update(t *testing.T) {
 		Name:     new(string),
 		Email:    new(string),
 		Password: new(string),
+        Role:     new(uint),
 	}
 
     *updatedUser.Name = "Kkk Elba"
     *updatedUser.Email = "kkk@elba.com"
     *updatedUser.Password = "ElbaPass"
+    *updatedUser.Role = 1
 
     mock.ExpectBegin()
 
     mock.ExpectQuery(`SELECT \* FROM "users" WHERE "users"\."id" = \$1 ORDER BY "users"\."id" LIMIT \$2`).
         WithArgs(userID, sqlmock.AnyArg()).
-        WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password"}).
-        AddRow(userID, "John Doe", "john@doe.com", "mypass"))
+        WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password", "role"}).
+        AddRow(userID, "John Doe", "john@doe.com", "mypass", 0))
 
     mock.ExpectExec(`UPDATE "users" SET .* WHERE "id" = \$[0-9]+`).
         WithArgs(
             *updatedUser.Name,
             *updatedUser.Email,
             *updatedUser.Password,
+            *updatedUser.Role,
             userID,
         ).
         WillReturnResult(sqlmock.NewResult(1, 1))

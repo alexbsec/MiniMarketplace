@@ -15,6 +15,7 @@ type User struct {
 	Name     *string `gorm:"not null" json:"name"`
 	Email    *string `gorm:"unique" json:"email"`
 	Password *string `gorm:"not null" json:"password"`
+    Role     *uint   `gorm:"not null" json:"role"`
 }
 
 type UserService struct {

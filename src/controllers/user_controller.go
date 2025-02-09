@@ -30,6 +30,7 @@ type userOut struct {
 	ID    uint    `json:"id"`
 	Name  *string `json:"name"`
 	Email *string `json:"email"`
+    Role  *uint   `json:"role"`
 }
 
 // Handles
@@ -66,15 +67,15 @@ func handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+    const role Role = ROLE_USER
+    inRole := new(uint)
+    *inRole = uint(role)
 	user := &models.User{
 		Name:     userIn.Name,
 		Email:    userIn.Email,
 		Password: hash,
+        Role:     inRole,
 	}
-
-	user.Name = userIn.Name
-	user.Email = userIn.Email
-	user.Password = hash
 
 	if err := userService.Create(user); err != nil {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
@@ -85,6 +86,7 @@ func handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	out.ID = user.ID
 	out.Name = user.Name
 	out.Email = user.Email
+    out.Role = user.Role
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(out)
@@ -98,7 +100,7 @@ func handleFetchUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    if (!userAuthFlow(w, r, uint(id))) {
+    if (!UserAuthFlow(w, r, uint(id), ROLE_USER)) {
         return
     }
 
@@ -117,6 +119,7 @@ func handleFetchUser(w http.ResponseWriter, r *http.Request) {
 	out.ID = user.ID
 	out.Name = user.Name
 	out.Email = user.Email
+    out.Role = user.Role
 
 	json.NewEncoder(w).Encode(out)
 }
@@ -129,7 +132,7 @@ func handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    if (!userAuthFlow(w, r, uint(id))) {
+    if (!UserAuthFlow(w, r, uint(id), ROLE_USER)) {
         return
     }
 
@@ -190,6 +193,7 @@ func handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
+        Role:  user.Role,
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -203,8 +207,8 @@ func handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid user ID", http.StatusNotFound)
 		return
 	}
-
-    if (!userAuthFlow(w, r, uint(id))) {
+    
+    if (!UserAuthFlow(w, r, uint(id), ROLE_USER)) {
         return
     }
 
@@ -328,29 +332,3 @@ func checkUpdateEmailFlow(updateBody *userUpdateBody) (*string, int, error) {
 	return nil, http.StatusOK, nil
 }
 
-func userAuthFlow(w http.ResponseWriter, r *http.Request, id uint) bool {
-    jwtCtt, err := ParseJWT(r) 
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusUnauthorized)
-        return false
-    }
-
-    if jwtCtt.ID != id {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized) 
-        return false
-    } 
-
-    reqUser, err := userService.Fetch(jwtCtt.ID) 
-    if err != nil {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return false
-    }
-   
-    _, err = ValidateUserRequest(r, reqUser) 
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusUnauthorized)
-        return false
-    }
-
-    return true
-}

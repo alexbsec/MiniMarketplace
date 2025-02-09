@@ -25,6 +25,9 @@ func HandleProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCreateProduct(w http.ResponseWriter, r *http.Request) {
+    if !UserAuthFlowLax(w, r, ROLE_ADMIN) {
+        return
+    }
     var product models.Product
     if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
         http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -64,6 +67,10 @@ func handleFetchProduct(w http.ResponseWriter, r *http.Request) {
 
 
 func handleUpdateProduct(w http.ResponseWriter, r *http.Request) {
+    if !UserAuthFlowLax(w, r, ROLE_ADMIN) {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
     idStr := r.URL.Path[len("/products/"):]
     id, err := strconv.Atoi(idStr)
     if err != nil {
@@ -114,6 +121,9 @@ func handleUpdateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
+    if !UserAuthFlowLax(w, r, ROLE_ADMIN) {
+        return
+    }
     idStr := r.URL.Path[len("/products/"):]
     id, err := strconv.Atoi(idStr)
     if err != nil {
