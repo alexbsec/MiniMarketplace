@@ -6,12 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/alexbsec/MiniMarketplace/src/db/config"
 	"github.com/alexbsec/MiniMarketplace/src/db/models"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var userService *models.UserService
 
 // This is used to validate password
 type userBody struct {
@@ -29,23 +26,10 @@ type userUpdateBody struct {
 	ConfirmPassword *string `json:"confirm_password"`
 }
 
-type loginBody struct {
-	Email    *string `json:"email"`
-	Password *string `json:"password"`
-}
-
 type userOut struct {
 	ID    uint    `json:"id"`
 	Name  *string `json:"name"`
 	Email *string `json:"email"`
-}
-
-func init() {
-	service, err := config.InitService()
-	if err != nil {
-		panic(fmt.Sprintf("Failed to initialize database service: %v", err))
-	}
-	userService = &models.UserService{Service: service}
 }
 
 // Handles
@@ -61,15 +45,6 @@ func HandleUsers(w http.ResponseWriter, r *http.Request) {
 		handleDeleteUser(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		handleLoginUser(w, r)
-	default:
-		http.Error(w, "Method not allowd", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -240,33 +215,7 @@ func handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func handleLoginUser(w http.ResponseWriter, r *http.Request) {
-    var params loginBody
-    if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-        http.Error(w, "Invalid request payload", http.StatusBadRequest)
-        return
-    }
-   
-    if params.Email == nil || params.Password == nil {
-        http.Error(w, "Please provide your e-mail and password", http.StatusBadRequest)
-        return
-    }
 
-    userRec, err := userService.FetchUserByEmail(params.Email)
-    if err != nil {
-        http.Error(w, "Usuário ou senha incorretos", http.StatusNotFound)
-        return
-    }
-
-    passwordsMatch := verifyPassword(*params.Password, *userRec.Password)
-    if (!passwordsMatch) {
-        http.Error(w, "Usuário ou senha incorretos", http.StatusUnauthorized) 
-        return
-    }
-
-    // TODO: Handle login logic (give token etc)
-    w.WriteHeader(http.StatusOK)
-}
 
 func hashPassword(password string) (*string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)

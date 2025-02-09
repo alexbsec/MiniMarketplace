@@ -2,23 +2,11 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/alexbsec/MiniMarketplace/src/db/config"
 	"github.com/alexbsec/MiniMarketplace/src/db/models"
 )
-
-var productService *models.ProductService
-
-func init() {
-    service, err := config.InitService()
-    if err != nil {
-        panic(fmt.Sprintf("Failed to initialize database service: %v", err))
-    }
-    productService = &models.ProductService{Service: service}
-}
 
 // Handle 
 func HandleProducts(w http.ResponseWriter, r *http.Request) {
