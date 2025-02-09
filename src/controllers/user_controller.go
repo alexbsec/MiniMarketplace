@@ -90,13 +90,17 @@ func handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(out)
 }
 
-func handleFetchUser(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		http.Error(w, "Invalid user", http.StatusBadRequest)
-		return
-	}
+func handleFetchUser(w http.ResponseWriter, r *http.Request) { 
+    idStr := r.URL.Query().Get("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "Invalid user", http.StatusBadRequest)
+        return
+    }
+
+    if (!userAuthFlow(w, r, uint(id))) {
+        return
+    }
 
 	user, err := userService.Fetch(uint(id))
 	if err != nil {
@@ -124,6 +128,10 @@ func handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid user ID", http.StatusNotFound)
 		return
 	}
+
+    if (!userAuthFlow(w, r, uint(id))) {
+        return
+    }
 
 	user, err := userService.Fetch(uint(id))
 	if err != nil {
@@ -196,13 +204,19 @@ func handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+    if (!userAuthFlow(w, r, uint(id))) {
+        return
+    }
+
 	user, err := userService.Fetch(uint(id))
 	if err != nil {
+        // This should never be written, but here regardless
 		http.Error(w, "Usuário não existe", http.StatusNotFound)
 		return
 	}
 
 	if user == nil {
+        // This should never be written, but here regardless
 		http.Error(w, "Usuário não existe", http.StatusNotFound)
 		return
 	}
@@ -312,4 +326,31 @@ func checkUpdateEmailFlow(updateBody *userUpdateBody) (*string, int, error) {
 	}
 
 	return nil, http.StatusOK, nil
+}
+
+func userAuthFlow(w http.ResponseWriter, r *http.Request, id uint) bool {
+    jwtCtt, err := ParseJWT(r) 
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return false
+    }
+
+    if jwtCtt.ID != id {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized) 
+        return false
+    } 
+
+    reqUser, err := userService.Fetch(jwtCtt.ID) 
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return false
+    }
+   
+    _, err = ValidateUserRequest(r, reqUser) 
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return false
+    }
+
+    return true
 }
