@@ -43,26 +43,26 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UserAuthFlowLax(w http.ResponseWriter, r *http.Request, expectRole Role) bool {
+func UserAuthFlowLax(w http.ResponseWriter, r *http.Request, expectRole Role) (*models.User, bool) {
     jwtCtt, err := parseJWT(r) 
     if err != nil {
         http.Error(w, err.Error(), http.StatusUnauthorized)
-        return false
+        return nil, false 
     }
 
     reqUser, err := userService.Fetch(jwtCtt.ID) 
     if err != nil {
         http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return false
+        return nil, false
     }
   
     _, err = validateUserRequest(r, reqUser, expectRole) 
     if err != nil {
         http.Error(w, err.Error(), http.StatusUnauthorized)
-        return false
+        return nil, false
     }
 
-    return true
+    return reqUser, true
 }
 
 func UserAuthFlow(w http.ResponseWriter, r *http.Request, id uint, expectRole Role) bool {

@@ -21,6 +21,9 @@ func (app *App) initializeRoutes() {
     app.Router.HandleFunc("/users/", controllers.HandleUsers)
 
     app.Router.HandleFunc("/login", controllers.HandleLogin)
+
+    app.Router.HandleFunc("/wallets", controllers.HandleWallets)
+    app.Router.HandleFunc("/wallets/", controllers.HandleWallets)
 }
 
 // Initialize the app with the router and services

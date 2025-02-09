@@ -10,6 +10,7 @@ import (
 var (
     productService  *models.ProductService
     userService     *models.UserService
+    walletService   *models.WalletService
 )
 
 func init() {
@@ -19,4 +20,5 @@ func init() {
 	}
     productService = &models.ProductService{Service: service}
 	userService = &models.UserService{Service: service}
+    walletService = &models.WalletService{Service: service}
 }

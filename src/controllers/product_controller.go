@@ -25,7 +25,8 @@ func HandleProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCreateProduct(w http.ResponseWriter, r *http.Request) {
-    if !UserAuthFlowLax(w, r, ROLE_ADMIN) {
+    _, result := UserAuthFlowLax(w, r, ROLE_ADMIN)
+    if !result {
         return
     }
     var product models.Product
@@ -67,8 +68,8 @@ func handleFetchProduct(w http.ResponseWriter, r *http.Request) {
 
 
 func handleUpdateProduct(w http.ResponseWriter, r *http.Request) {
-    if !UserAuthFlowLax(w, r, ROLE_ADMIN) {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+    _, result := UserAuthFlowLax(w, r, ROLE_ADMIN)
+    if !result {
         return
     }
     idStr := r.URL.Path[len("/products/"):]
@@ -121,7 +122,8 @@ func handleUpdateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
-    if !UserAuthFlowLax(w, r, ROLE_ADMIN) {
+    _, result := UserAuthFlowLax(w, r, ROLE_ADMIN)
+    if !result {
         return
     }
     idStr := r.URL.Path[len("/products/"):]
