@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/alexbsec/MiniMarketplace/src/db/models"
 )
@@ -19,6 +20,10 @@ func HandleWallets(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		handleCreateWallet(w, r)
+    case http.MethodGet:
+        handleFetchWallet(w, r)
+    case http.MethodPut:
+        handleUpdateWallet(w, r)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -81,5 +86,107 @@ func handleCreateWallet(w http.ResponseWriter, r *http.Request) {
     out.UserID = wallet.UserID
 
     w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(out)
+}
+
+func handleFetchWallet(w http.ResponseWriter, r *http.Request) {
+    idStr := r.URL.Query().Get("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "Invalid wallet", http.StatusBadRequest) 
+        return
+    }
+
+    user, result := UserAuthFlowLax(w, r, ROLE_USER)
+    if !result {
+        return
+    }
+
+    wallet, err := walletService.Fetch(uint(id))
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    if *user.Role != uint(ROLE_ADMIN) && wallet.UserID != user.ID {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    var out walletOut
+    out.ID = wallet.ID
+    out.Name = wallet.Name
+    out.Amount = wallet.Amount
+    out.Points = wallet.Points
+    out.UserID = wallet.UserID
+
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(out)
+}
+
+func handleUpdateWallet(w http.ResponseWriter, r *http.Request) {
+    idStr := r.URL.Query().Get("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "Invalid wallet", http.StatusBadRequest) 
+        return
+    }
+
+    user, result := UserAuthFlowLax(w, r, ROLE_USER)
+    if !result {
+        return
+    }
+
+    var newWallet models.Wallet
+    if err := json.NewDecoder(r.Body).Decode(&newWallet); err != nil {
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
+        return
+    }
+
+    wallet, err := walletService.Fetch(uint(id))
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    if newWallet.UserID != wallet.UserID {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    if *user.Role != uint(ROLE_ADMIN) && wallet.UserID != user.ID {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    // Only allow amount and points update if request is made by admin
+    if *user.Role == uint(ROLE_ADMIN) {
+        if newWallet.Amount != nil {
+           wallet.Amount = newWallet.Amount 
+        }
+
+        if newWallet.Points != nil {
+            wallet.Points = newWallet.Points
+        }
+    }
+
+    if newWallet.Name != nil {
+        wallet.Name = newWallet.Name
+    }
+
+
+    if err := walletService.Update(uint(id), wallet); err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    var out walletOut
+    out.ID = wallet.ID
+    out.Name = wallet.Name
+    out.Amount = wallet.Amount
+    out.Points = wallet.Points
+    out.UserID = wallet.UserID
+
+    w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(out)
 }
