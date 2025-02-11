@@ -20,6 +20,7 @@ clean architecture, logging, and API management.
 
 ## Project Structure
 
+
 ```bash
 /MiniMarketplace
     ├── src
