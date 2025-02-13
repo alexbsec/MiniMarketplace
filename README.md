@@ -24,17 +24,18 @@ clean architecture, logging, and API management.
 
 ```bash
 /MiniMarketplace
-    ├── src
-    │   ├── logging             # Custom logger implementation
-    │   │   ├── logger.go
-    │   │   └── logger_test.go  # Unit tests for the logger
-    │   ├── products            # Product CRUD handlers and data access
-    │   └── main.go             # Application entry point
-    ├── Dockerfile              # Docker build configuration
-    ├── docker-compose.yaml     # Docker Compose setup
-    ├── go.mod                  # Go module dependencies
-    ├── go.sum
-    └── README.md               # Documentation
+    ├── bin
+    └── src
+        ├── controllers
+        ├── core
+        ├── db
+        │   ├── config
+        │   ├── migrations
+        │   └── models
+        │       ├── tests
+        │       └── utils
+        ├── logging
+        └── scripts
 ```
 
 ## Setup and installation
@@ -67,6 +68,12 @@ application.
 ### Docker
 
 If runnning with docker, run inside root directory:
+
+```bash
+go mod tidy
+```
+
+Then, simply run `docker-compose`:
 
 ```bash
 docker-compose up --build
