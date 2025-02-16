@@ -4,6 +4,7 @@ This project is a simple backend system that simulates a mini marketplace where 
 can manage products and services. It’s built using Go with PostgreSQL and demonstrates 
 clean architecture, logging, and API management.
 
+
 ## Features
 
 - RESTful API for managing products and services.
