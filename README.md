@@ -6,6 +6,7 @@ clean architecture, logging, and API management.
 
 ## Features
 
+
 - RESTful API for managing products and services.
 - PostgreSQL integration for persistent storage.
 - Custom logging using Go's slog with colorized output.
